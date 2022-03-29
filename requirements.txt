@@ -1,0 +1,10 @@
+setuptools
+tqdm 
+numpy
+pandas
+pathos
+click
+matplotlib
+seaborn
+pytorch>=1.10.*
+yaml

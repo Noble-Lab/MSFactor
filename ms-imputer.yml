@@ -1,0 +1,21 @@
+name: ms-imputer
+channels:
+  - pytorch
+  - bioconda
+  - conda-forge
+  - anaconda
+dependencies:
+  - python=3.7
+  - tqdm
+  - seaborn
+  - scikit-learn
+  - pytorch=1.10.*
+  - pandas
+  - numpy
+  - pip
+  - matplotlib
+  - yaml
+  - pip:
+    - argparse==1.4.*
+    - pyyaml
+
