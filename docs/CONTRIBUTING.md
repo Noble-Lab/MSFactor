@@ -51,39 +51,38 @@ Get Started!
 
 Ready to contribute? Here's how to set up `ms-imputer` for local development.
 
-1. Fork the `ms_imputer` repo on GitHub.
-2. Clone your fork locally:
+1.  Fork the `ms-imputer` repo on GitHub: https://github.com/lincoln-harris/ms-imputer
+2.  Clone your fork locally:
 
-    $ git clone git@github.com:your_name_here/ms-imputer.git
+        $ git clone https://github.com/your-name/ms-imputer.git
 
-3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development:
+3.  Install your local copy into a virtualenv. Using the standard library [`venv`](https://docs.python.org/3/library/venv.html) module: 
 
-    $ mkvirtualenv ms-imputer
-    $ cd ms_imputer/
-    $ python setup.py develop
+        $ cd ms-imputer
+        $ python3 -m venv ms-imputer-dev
+        $ source ms-imputer-dev/bin/activate
+        $ pip3 install -r requirements.txt -r test_requirements.txt -e .
 
-4. Create a branch for local development:
+4.  Create a branch for local development:
 
-    $ git checkout -b name-of-your-bugfix-or-feature
+        $ git checkout -b name-of-your-bugfix-or-feature
 
-   Now you can make your changes locally.
+    Now you can make your changes locally.
 
-5. When you're done making changes, check that your changes pass flake8 and the
-   tests, including testing other Python versions with tox:
+5.  When you're done making changes, check that your changes pass `flake8` and `pytest`:
 
-    $ flake8 ms-imputer tests
-    $ python setup.py test or pytest
-    $ tox
+        $ make test
+        $ make coverage
+        $ make lint
 
-   To get flake8 and tox, just pip install them into your virtualenv.
+6.  Commit your changes and push your branch to GitHub:
 
-6. Commit your changes and push your branch to GitHub:
+        $ git add .
+        $ git commit -m "Your detailed description of your changes."
+        $ git push origin name-of-your-bugfix-or-feature
 
-    $ git add .
-    $ git commit -m "Your detailed description of your changes."
-    $ git push origin name-of-your-bugfix-or-feature
-
-7. Submit a pull request through the GitHub website.
+7.  Submit a pull request through the GitHub website.
+See [CONTRIBUTING.md](https://github.com/lincoln-harris/ms-imputer/blob/master/docs/CONTRIBUTING.md) for more. 
 
 Pull Request Guidelines
 -----------------------
