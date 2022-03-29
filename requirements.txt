@@ -6,5 +6,4 @@ pathos
 click
 matplotlib
 seaborn
-pytorch>=1.10.*
-yaml
+torch

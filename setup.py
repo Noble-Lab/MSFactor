@@ -1,23 +1,43 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-"""The setup script."""
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
-from setuptools import setup, find_packages
-
-with open('README.rst') as readme_file:
+with open('README.md') as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
-    history = history_file.read()
+with open('requirements.txt') as requirements_file:
+    requirements = requirements_file.read()
 
-requirements = [ ]
+test_requirements = [
+    'pytest', 'coverage', "flake8"
+]
 
-test_requirements = ['pytest>=3', ]
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
 setup(
+    name='ms-imputer',
+    version='0.1.0',
+    description="Impute missing values using NMF",
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     author="Lincoln Harris",
     author_email='lincolnh@uw.edu',
-    python_requires='>=3.6',
+    url='https://github.com/lincoln-harris/ms-imputer',
+    packages=[
+        'ms-imputer',
+    ],
+    package_dir={'ms-imputer':
+                     'ms-imputer'},
+    include_package_data=True,
+    install_requires=requirements,
+    license="MIT",
+    zip_safe=False,
+    keywords='ms-imputer',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
@@ -28,22 +48,11 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-    description="Python Boilerplate contains all the boilerplate you need to create a Python package.",
     entry_points={
         'console_scripts': [
-            'ms_imputer=ms_imputer.cli:main',
-        ],
+            'cerebra = cerebra.commandline:cli'
+        ]
     },
-    install_requires=requirements,
-    license="MIT license",
-    long_description=readme + '\n\n' + history,
-    include_package_data=True,
-    keywords='ms_imputer',
-    name='ms_imputer',
-    packages=find_packages(include=['ms_imputer', 'ms_imputer.*']),
     test_suite='tests',
-    tests_require=test_requirements,
-    url='https://github.com/lincoln-harris/ms_imputer',
-    version='0.1.0',
-    zip_safe=False,
+    tests_require=test_requirements
 )
