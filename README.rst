@@ -20,7 +20,7 @@ ms-imputer
 
 
 
-Python Boilerplate contains all the boilerplate you need to create a Python package.
+Welcome to `ms-imputer`!
 
 
 * Free software: MIT license

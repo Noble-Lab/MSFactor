@@ -5,9 +5,10 @@ Credits
 Development Lead
 ----------------
 
-* Lincoln Harris <lincolnh@uw.edu>
+* Lincoln Harris <lincolnh@uw.edu> <@lincoln-harris>
 
 Contributors
 ------------
 
-None yet. Why not be the first?
+* Will Fondrie <wfondrie@talus.bio>
+* Bill Nobel <wnoble@uw.edu>
