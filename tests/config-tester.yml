@@ -1,0 +1,31 @@
+# Data partitioning params
+min_present: 3
+valid_frac: 0.1  
+test_frac: 0.1
+
+# should the data be logged before data partitioning?
+log_transform: False
+
+# General model training params
+max_iters: 3000
+factors_range: [1,2,4,8,16,32,64]
+
+# NMF model training params
+batch_size: 1000
+learning_rate: 0.05
+tolerance: 0.0001
+patience: 10
+loss_func: "MSE"
+
+# MissForest model training params
+mf_max_iters: 25
+trees_range: [10, 25, 50, 100, 200, 400, 800]
+parallelize: "forests"
+
+# Perceptron model training params
+p_tolerance: 0.0
+p_max_iters: 0
+
+# DNN model training params
+dnn_tolerance: 0.0
+dnn_max_iters: 0
