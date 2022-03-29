@@ -6,7 +6,7 @@ ms-imputer
 What is `ms-imputer`?
 --------------------
 
-* TODO
+This tool uses non-negative matrix factorization to impute missing values in quantitative mass spectrometry data. 
 
 Features
 --------
@@ -26,11 +26,17 @@ Usage
 Authors
 -------
 
-This work was produced by [Lincoln Harris](https://github.com/lincoln-harris) and [Bill Noble](https://github.com/wsnoble), of the University of Washington, and [Will Fondrie](https://github.com/wfondrie) of Talus Biosciences. 
+This work was produced by [Lincoln Harris](https://github.com/lincoln-harris) and [Bill Noble](https://github.com/wsnoble), of the University of Washington, and [Will Fondrie](https://github.com/wfondrie) of [Talus Bioscience](https://www.talus.bio/). For questions please contact lincolnh@uw.edu. 
 
 Contributing
 ------------
 
-* TODO
+We welcome any bug reports, feature requests or other contributions. 
+Please submit a well documented report on our [issue tracker](https://github.com/lincoln-harris/ms-imputer/issues). 
+For substantial changes please fork this repo and submit a pull request for review. 
+
+See [CONTRIBUTING.md](https://github.com/lincoln-harris/ms-imputer/blob/main/docs/CONTRIBUTING.md) for additional details. 
+
+You can find official releases [here](https://github.com/lincoln-harris/ms-imputer/releases). 
 
 
