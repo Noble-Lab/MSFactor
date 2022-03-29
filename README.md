@@ -8,20 +8,26 @@ What is `ms-imputer`?
 
 This tool uses non-negative matrix factorization to impute missing values in quantitative mass spectrometry data. 
 
-Features
---------
-
-* TODO
-
 Installation
 ------------
 
 * TODO
 
 Usage
-------------------
+-----
 
-* TODO
+```
+$ python fit_nmf.py --csv_path /path/to/input --PXD str --output_path /path/to/output
+```
+
+Arguments
+---------
+`--csv_path` : _str_, path to input csv file (matrix with missing values). Required     
+`--PXD` : _str_, protein exchange identifier. Required       
+`--output_path` : _str_,  where to write output (reconstructed matrix without missing values). Required     
+`--factors` : _int_, the number of latent factors to train NMF model with. Not required      
+`--learning_rate` : _float_, the optimizer learning rate. Not required      
+`--max_epochs` : _int_, max number of training epochs. Not required     
 
 Authors
 -------
