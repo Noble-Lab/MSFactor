@@ -1,5 +1,5 @@
 """ 
-FIT_NMF
+MS_IMPUTER
 
 This module fits an NMF model for a single PRIDE matrix. 
 If requested, fits models across a range of latent factors.
@@ -10,7 +10,7 @@ import numpy as np
 import click
 import torch
 
-from models.linear import GradNMFImputer
+from ms_imputer.models.linear import GradNMFImputer
 
 @click.command()
 @click.option("--csv_path", type=str, 
@@ -28,7 +28,7 @@ from models.linear import GradNMFImputer
 @click.option("--max_epochs", type=int,
 				help="max number of training epochs", 
 				required=False)
-def fit_nmf(
+def main(
 		csv_path, 
 		PXD,
 		output_path, 
@@ -80,4 +80,7 @@ def fit_nmf(
 
 	# write reconstructed matrix to csv
 	pd.DataFrame(recon).to_csv(output_path + "nmf_reconstructed.csv")
+
+if __name__ == "__main__":
+    main()
 

@@ -48,9 +48,9 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .pytest_cache
 
 lint/flake8: ## check style with flake8
-	flake8 ms-imputer tests
+	flake8 ms_imputer tests
 lint/black: ## check style with black
-	black --check ms-imputer tests
+	black --check ms_imputer tests
 
 lint: lint/flake8 lint/black ## check style
 
@@ -61,7 +61,7 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source ms-imputer -m pytest
+	coverage run --source ms_imputer -m pytest
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html
