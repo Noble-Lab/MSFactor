@@ -15,7 +15,7 @@ With the python standard library [`venv`](https://docs.python.org/3/library/venv
 ```
 python3 -m venv cerebra
 source cerebra/bin/activate
-pip3 install cerebra 
+pip3 install -e . 
 ```
 
 With [conda](https://docs.conda.io/en/latest/)
@@ -35,12 +35,12 @@ Usage: ms_imputer [OPTIONS]
 Fit an NMF model to the input matrix, impute missing values.
 
 Options:
-  --csv_path TEXT        path to the trimmed input file
-  --PXD TEXT             protein exchange identifier
-  --output_path TEXT     path to output file
-  --factors INTEGER      number of factors to use for reconstruction
-  --learning_rate FLOAT  the optimizer learning rate
-  --max_epochs INTEGER   max number of training epochs
+  --csv_path TEXT        path to the trimmed input file (required)
+  --PXD TEXT             protein exchange identifier (required)
+  --output_path TEXT     path to output file (required)
+  --factors INTEGER      number of factors to use for reconstruction (optional)
+  --learning_rate FLOAT  the optimizer learning rate (optional)
+  --max_epochs INTEGER   max number of training epochs (optional)
   --help                 Show this message and exit.
 ```    
 
