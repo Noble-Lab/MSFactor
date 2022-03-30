@@ -1,4 +1,4 @@
-"""Top-level package for ms-imputer."""
+"""Top-level package for ms_imputer."""
 
 __author__ = """Lincoln Harris"""
 __email__ = 'lincolnh@uw.edu'

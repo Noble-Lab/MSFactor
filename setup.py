@@ -20,24 +20,24 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='ms-imputer',
+    name='ms_imputer',
     version='0.1.0',
     description="Impute missing values using NMF",
     long_description=long_description,
     long_description_content_type='text/markdown',
     author="Lincoln Harris",
     author_email='lincolnh@uw.edu',
-    url='https://github.com/lincoln-harris/ms-imputer',
+    url='https://github.com/lincoln-harris/ms_imputer',
     packages=[
-        'ms-imputer',
+        'ms_imputer',
     ],
-    package_dir={'ms-imputer':
-                     'ms-imputer'},
+    package_dir={'ms_imputer':
+                     'ms_imputer'},
     include_package_data=True,
     install_requires=requirements,
     license="MIT",
     zip_safe=False,
-    keywords='ms-imputer',
+    keywords='ms_imputer',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',

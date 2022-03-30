@@ -2,8 +2,7 @@ setuptools
 tqdm 
 numpy
 pandas
-pathos
-click
 matplotlib
 seaborn
 torch
+click

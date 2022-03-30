@@ -1,4 +1,4 @@
-name: ms-imputer
+name: ms_imputer
 channels:
   - pytorch
   - bioconda
@@ -14,8 +14,6 @@ dependencies:
   - numpy
   - pip
   - matplotlib
-  - yaml
   - pip:
     - argparse==1.4.*
-    - pyyaml
 
