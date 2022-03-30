@@ -1,9 +1,9 @@
-ms-imputer
+ms_imputer
 ==========
-[![PyPi](https://img.shields.io/pypi/v/ms-imputer.svg)](https://pypi.python.org/pypi/ms-imputer)
-[![Build Status](https://img.shields.io/travis/lincoln-harris/ms-imputer.svg)](https://travis-ci.com/lincoln-harris/ms-imputer)     
+[![PyPi](https://img.shields.io/pypi/v/ms_imputer.svg)](https://pypi.python.org/pypi/ms_imputer)
+[![Build Status](https://img.shields.io/travis/lincoln-harris/ms_imputer.svg)](https://travis-ci.com/lincoln-harris/ms_imputer)     
 
-What is `ms-imputer`?
+What is `ms_imputer`?
 --------------------
 
 This tool uses non-negative matrix factorization to impute missing values in quantitative mass spectrometry data. 
