@@ -50,7 +50,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'cerebra = cerebra.commandline:cli'
+            'ms_imputer = ms_imputer.ms_imputer:main'
         ]
     },
     test_suite='tests',
