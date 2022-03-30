@@ -11,7 +11,7 @@ Types of Contributions
 
 ### Report Bugs
 
-Report bugs at https://github.com/lincoln-harris/ms_imputer/issues.
+Report bugs at https://github.com/Noble-Lab/ms_imputer/issues.
 
 If you are reporting a bug, please include:
 
@@ -37,7 +37,7 @@ articles, and such.
 
 ### Submit Feedback
 
-The best way to send feedback is to file an issue at https://github.com/lincoln-harris/ms_imputer/issues.
+The best way to send feedback is to file an issue at https://github.com/Noble-Lab/ms_imputer/issues.
 
 If you are proposing a feature:
 
@@ -51,7 +51,7 @@ Get Started!
 
 Ready to contribute? Here's how to set up `ms_imputer` for local development.
 
-1.  Fork the `ms_imputer` repo on GitHub: https://github.com/lincoln-harris/ms_imputer
+1.  Fork the `ms_imputer` repo on GitHub: https://github.com/Noble-Lab/ms_imputer
 2.  Clone your fork locally:
 
         $ git clone https://github.com/your-name/ms_imputer.git
@@ -82,7 +82,7 @@ Ready to contribute? Here's how to set up `ms_imputer` for local development.
         $ git push origin name-of-your-bugfix-or-feature
 
 7.  Submit a pull request through the GitHub website.
-See [CONTRIBUTING.md](https://github.com/lincoln-harris/ms_imputer/blob/master/docs/CONTRIBUTING.md) for more. 
+See [CONTRIBUTING.md](https://github.com/Noble-Lab/ms_imputer/blob/main/docs/CONTRIBUTING.md) for more. 
 
 Pull Request Guidelines
 -----------------------
@@ -94,26 +94,5 @@ Before you submit a pull request, check that it meets these guidelines:
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
 3. The pull request should work for Python 3.5, 3.6, 3.7 and 3.8, and for PyPy. Check
-   https://travis-ci.com/lincoln-harris/ms_imputer/pull_requests
+   https://travis-ci.com/Noble-Lab/ms_imputer/pull_requests
    and make sure that the tests pass for all supported Python versions.
-
-Tips
-----
-
-To run a subset of tests:
-
-$ pytest tests.test_ms_imputer
-
-
-Deploying
----------
-
-A reminder for the maintainers on how to deploy.
-Make sure all your changes are committed (including an entry in HISTORY.rst).
-Then run:
-
-$ bump2version patch # possible: major / minor / patch
-$ git push
-$ git push --tags
-
-Travis will then deploy to PyPI if tests pass.
