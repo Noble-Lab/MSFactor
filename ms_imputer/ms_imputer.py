@@ -35,47 +35,53 @@ def main(
 	"""  
 	Fit an NMF model to the input matrix, impute missing values.
 	"""
+	# Default model configs. Overwritten by commandline args
+	n_factors = 8
+	lr = 0.05
+	max_iters = 3000
+	tolerance = 0.0001
+	batch_size = 1000
 
-	# set default configs
+	# Overwrite default configs, if specified
 	if factors:
 		n_factors = factors 
-	else: 
-		n_factors = 8
-
 	if learning_rate:
 		lr = learning_rate
-	else:
-		lr = 0.05
-
 	if max_epochs:
 		max_iters = max_epochs
-	else:
-		max_iters = 3000
 	
 	# read in quants matrix, replace 0s with nans
 	quants_matrix = pd.read_csv(csv_path)
-	quants_matrix.replace(0, np.nan, inplace=True)
+	quants_matrix.replace([0, 0.0], np.nan, inplace=True)
 	quants_matrix = np.array(quants_matrix)
 
 	# init model
 	nmf_model = GradNMFImputer(
-					quants_matrix.shape[0], 
-					quants_matrix.shape[1], 
+					n_rows=quants_matrix.shape[0], 
+					n_cols=quants_matrix.shape[1], 
 					n_factors=n_factors, 
-					stopping_tol=0.0001, 
-					train_batch_size=1000, 
-					eval_batch_size=1000,
+					stopping_tol=tolerance, 
+					train_batch_size=batch_size, 
+					eval_batch_size=batch_size,
 					n_epochs=max_iters, 
 					loss_func="MSE",
 					optimizer=torch.optim.Adam,
 					optimizer_kwargs={"lr": lr}
 				)
-	
+
 	# fit model, get reconstruction
+	print(" ")
+	print("fitting model")
 	recon = nmf_model.fit_transform(quants_matrix)
 
 	# write reconstructed matrix to csv
-	pd.DataFrame(recon).to_csv(output_path + pxd + "_nmf_reconstructed.csv")
+	pd.DataFrame(recon).to_csv(
+					output_path + pxd + "_nmf_reconstructed.csv", 
+					index=False
+	)
+
+	print("Done!")
+	print(" ")
 
 if __name__ == "__main__":
     main()
