@@ -11,7 +11,7 @@ from ms_imputer.models.linear import GradNMFImputer
 @click.command()
 @click.option("--csv_path", type=str, 
 				help="path to the trimmed input file")
-@click.option("--PXD", type=str,
+@click.option("--pxd", type=str,
 				help="protein exchange identifier")
 @click.option("--output_path", type=str,
 				help="path to output file")
@@ -26,7 +26,7 @@ from ms_imputer.models.linear import GradNMFImputer
 				required=False)
 def main(
 		csv_path, 
-		PXD,
+		pxd,
 		output_path, 
 		factors=None, 
 		learning_rate=None, 
@@ -47,7 +47,7 @@ def main(
 	else:
 		lr = 0.05
 
-	if max_iters:
+	if max_epochs:
 		max_iters = max_epochs
 	else:
 		max_iters = 3000
@@ -72,10 +72,10 @@ def main(
 				)
 	
 	# fit model, get reconstruction
-	recon = nmf_model.fit_transform(train, val)
+	recon = nmf_model.fit_transform(quants_matrix)
 
 	# write reconstructed matrix to csv
-	pd.DataFrame(recon).to_csv(output_path + "nmf_reconstructed.csv")
+	pd.DataFrame(recon).to_csv(output_path + pxd + "_nmf_reconstructed.csv")
 
 if __name__ == "__main__":
     main()
