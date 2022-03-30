@@ -11,23 +11,38 @@ This tool uses non-negative matrix factorization to impute missing values in qua
 Installation
 ------------
 
-* TODO
+With the python standard library [`venv`](https://docs.python.org/3/library/venv.html) module
+```
+python3 -m venv cerebra
+source cerebra/bin/activate
+pip3 install cerebra 
+```
+
+With [conda](https://docs.conda.io/en/latest/)
+```
+conda create -n ms_imputer python=3.7
+conda activate ms_imputer
+pip3 install -e . 
+```
 
 Usage
 -----
+`$ ms_imputer --help` should return usage information
 
 ```
-$ python fit_nmf.py --csv_path /path/to/input --PXD str --output_path /path/to/output
-```
+Usage: ms_imputer [OPTIONS]
 
-Arguments
----------
-`--csv_path` : _str_, path to input csv file (matrix with missing values). Required     
-`--PXD` : _str_, protein exchange identifier. Required       
-`--output_path` : _str_,  where to write output (reconstructed matrix without missing values). Required     
-`--factors` : _int_, the number of latent factors to train NMF model with. Not required      
-`--learning_rate` : _float_, the optimizer learning rate. Not required      
-`--max_epochs` : _int_, max number of training epochs. Not required     
+Fit an NMF model to the input matrix, impute missing values.
+
+Options:
+  --csv_path TEXT        path to the trimmed input file
+  --PXD TEXT             protein exchange identifier
+  --output_path TEXT     path to output file
+  --factors INTEGER      number of factors to use for reconstruction
+  --learning_rate FLOAT  the optimizer learning rate
+  --max_epochs INTEGER   max number of training epochs
+  --help                 Show this message and exit.
+```    
 
 Authors
 -------
