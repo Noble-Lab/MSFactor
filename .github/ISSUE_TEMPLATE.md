@@ -1,4 +1,4 @@
-* ms-imputer version:
+* ms_imputer version:
 * Python version:
 * Operating System:
 

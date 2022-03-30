@@ -1,9 +1,5 @@
 """ 
-MS_IMPUTER
-
-This module fits an NMF model for a single PRIDE matrix. 
-If requested, fits models across a range of latent factors.
-Need to specify cmd line args.
+The commandline entry point for ms_imputer
 """
 import pandas as pd 
 import numpy as np
