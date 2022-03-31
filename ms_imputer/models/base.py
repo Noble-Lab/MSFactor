@@ -105,8 +105,6 @@ class BaseImputer(torch.nn.Module):
         self.b = torch.nn.Parameter(torch.tensor(0).type(torch.FloatTensor))
         self.c = torch.nn.Parameter(torch.tensor(1).type(torch.FloatTensor))
 
-        self.cmse_loss = False
-
         # For training:
         self._history = []
 
@@ -124,7 +122,6 @@ class BaseImputer(torch.nn.Module):
             self.loss_func = self._rmse_loss
         elif loss_func == "CMSE":
             self.loss_func = self._corrected_mse_loss
-            self.cmse_loss = True
 
     def forward(self, locs):
         """The forward pass.
@@ -191,13 +188,7 @@ class BaseImputer(torch.nn.Module):
                 opt.zero_grad()
                 pred = self(locs)
 
-                if self.cmse_loss:
-                    train_loss = self.loss_func(
-                                    pred, target, 
-                                    self.a, self.b, self.c
-                                )
-                else:
-                    train_loss = self.loss_func(pred, target)
+                train_loss = self.loss_func(pred, target)
 
                 train_loss.backward()
                 opt.step()
@@ -275,7 +266,7 @@ class BaseImputer(torch.nn.Module):
 
         return X, Y
 
-    def _corrected_mse_loss(self, X_hat, X, a, b, c):
+    def _corrected_mse_loss(self, X_hat, X):
         """
         Calculate the variance-corrected mean squared error
         loss between predicted and target tensors
@@ -286,8 +277,6 @@ class BaseImputer(torch.nn.Module):
             The predicted values.
         X : torch.Tensor
             The target values.
-        a, b, c : float
-            Constants, to be optimized by the model
 
         Returns
         -------
@@ -297,11 +286,13 @@ class BaseImputer(torch.nn.Module):
         X_hat, X = self._mask_missing(X_hat, X)
 
         num = (X_hat - X)**2
-        denom = 2*(a*(X + b)**2 + c)
-        second_term = 0.5 * torch.log(a*(X + b)**2 + c)
+        denom = 2*(self.a*(X + self.b)**2 + self.c)
+        second_term = 0.5 * torch.log(self.a*(X + self.b)**2 + self.c)
 
         cmse_loss = torch.sum((num / denom) + second_term)
-        return torch.abs(cmse_loss)
+
+        # normalize loss to the size of the target set
+        return cmse_loss / X.size(dim=0)
 
     def _rmse_loss(self, X_hat, X):
         """Calculate the relative mean squared error.
@@ -321,7 +312,9 @@ class BaseImputer(torch.nn.Module):
         X_hat, X = self._mask_missing(X_hat, X)
 
         rmse_loss = torch.sum((X_hat - X)**2) / torch.sum(X**2)
-        return rmse_loss
+
+        # normalize loss to size of the target set
+        return rmse_loss / X.size(dim=0)
 
     def _evaluate(self, loader, epoch, name):
         """Evaluate model progress.
@@ -342,13 +335,7 @@ class BaseImputer(torch.nn.Module):
             pred, target = list(zip(*res))
             pred = torch.cat(pred)
             target = torch.cat(target)
-            if self.cmse_loss:
-                loss = self.loss_func(
-                                pred, target, 
-                                self.a, self.b, self.c
-                            )
-            else:
-                loss = self.loss_func(pred, target)
+            loss = self.loss_func(pred, target)
             try:
                 self._history[epoch][name] = loss.item()
                 self._history[epoch]['a'] = self.a.item()

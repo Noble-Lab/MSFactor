@@ -23,7 +23,7 @@ matrix_shape = (12,10,3) # (n_rows, n_cols, rank)
 long_matrix_shape = (200,8,2)
 
 # training params
-n_factors = 4 # for the first test
+n_factors = 4 # for the initial test
 tolerance = 0.0001
 batch_size = 100
 max_iters = 400
@@ -94,7 +94,6 @@ class SimulationTester(unittest.TestCase):
 
 		# init the first (basic) simulated matrix
 		self.matrix = simulate_matrix(matrix_shape)
-		pd.DataFrame(self.matrix).to_csv("simulated.csv", index=False)
 
 		self.train, self.val, self.test = \
 						ms_imputer.util_functions.split(
@@ -105,7 +104,6 @@ class SimulationTester(unittest.TestCase):
 		)
 		# init the second (long) simulated matrix
 		self.long_matrix = simulate_matrix(long_matrix_shape)
-		pd.DataFrame(self.long_matrix).to_csv("simulated.csv", index=False)
 
 		self.train_long, self.val_long, self.test_long = \
 						ms_imputer.util_functions.split(
@@ -114,7 +112,6 @@ class SimulationTester(unittest.TestCase):
 							test_frac=0.1, 
 							min_present=min_present
 		)
-		os.remove("simulated.csv")
 
 	def test_split(self):
 		"""
