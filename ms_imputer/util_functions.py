@@ -18,8 +18,6 @@ from itertools import product
 import json
 import logging
 
-#from scipy.optimize import curve_fit
-
 LOGGER = logging.getLogger(__name__)
 RAW_PATH = 'data/raw/'
 TRIM_PATH = 'data/trim/'
@@ -276,63 +274,6 @@ def matrix_downsample(mat, min_present=10):
     """
     zeros_by_row = ((mat == 0).sum(axis=1))
     return mat[zeros_by_row < min_present]
-
-
-def get_combinations(hlist, truncate=True):
-    """ 
-    Get all pairwise combinations in a list of
-    hyperparameters. Given the truncate param, 
-    return only the (x,y) pairs such that y >= x.
-    (x,y) indicates (n row lf, n col lf)
-    
-    Parameters
-    ----------
-    hlist : list, of hyperparameters 
-    truncate : boolean
-        false--do full 2D grid hyperparameter search, or 
-        true--truncate, including only the (x,y) combinations 
-                such that x <= y
-    
-    Returns
-    -------
-    filt_combs : list of tuples, pairwise combinations
-    """
-    combs = list(product(hlist, repeat=2))
-    combs = np.array(combs)
-    filt_combs = combs[[pair[0] <= pair[1] for pair in combs]]
-
-    if truncate: # truncated 2D grid search
-        return filt_combs
-    if not truncate: # full 2D grid search
-        return combs
-
-
-def prob_select(elm):
-    """ 
-    For a given float (0->1), take a random float (0->1).
-    If the input float is larger, return True, else return False
-    
-    Parameters
-    ----------
-    elm : float, a matrix element  
-
-    Returns
-    -------
-    boolean
-    """
-    seed = np.random.uniform(0,1)
-    
-    if elm > seed:
-        return True
-    else:
-        return False
-
-
-# def sigmoid_func(x, x0, k):
-#     """ 
-#     Defines sigmoid helper function to use for curve_fit() mapping
-#     """
-#     return 1 / (1 + np.exp(-k*(x-x0)))
 
 
 def split(matrix, val_frac=0.1, test_frac=0.1, min_present=5, 
