@@ -91,6 +91,7 @@ class BaseImputer(torch.nn.Module):
         self.stopping_tol = stopping_tol
         self.optimizer = optimizer
         self.optimizer_kwargs = optimizer_kwargs
+        self.early_stopping = None
 
         # Latent factors:
         self.row_factors = torch.nn.Embedding(n_rows, n_row_factors)
@@ -215,7 +216,7 @@ class BaseImputer(torch.nn.Module):
                     stopping_counter = 0
 
                 if stopping_counter == self.patience:
-                    print("early stopping triggered")
+                    self.early_stopping = "standard"
                     break
 
             # Evaluate early stopping -- is loss going back up
@@ -227,7 +228,7 @@ class BaseImputer(torch.nn.Module):
                 wilcoxon_p = ranksums(window2, window1, alternative="greater")[1]
 
                 if wilcoxon_p < 0.05:
-                    print("early stopping triggered")
+                    self.early_stopping = "wilcoxon"
                     break
 
         return self
