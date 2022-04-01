@@ -86,12 +86,6 @@ class ConvergenceTester(unittest.TestCase):
 
 		self.sim_recon = self.sim_model.fit_transform(self.train_sim, self.val_sim)
 
-	def test_scratch(self):
-		""" 
-		do something
-		"""
-		assert True == True
-
 	def test_reconstruction_real_matrix(self):
 		""" 
 		Evaluates reconstruction error for a real, but very small,
@@ -122,7 +116,7 @@ class ConvergenceTester(unittest.TestCase):
 			stopping_counter = 0
 			best_loss = np.min(self.real_model.history["Validation MSE"])
 
-			for val_loss in self.real_model.history["Validation MSE"][-10:]:
+			for val_loss in self.real_model.history["Validation MSE"][-11:-1]:
 				tol = np.abs((best_loss - val_loss) / best_loss)
 				loss_ratio = val_loss / best_loss
 
