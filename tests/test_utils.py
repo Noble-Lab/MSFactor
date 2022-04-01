@@ -1,4 +1,8 @@
-""" tests for bin/util_functions.py """
+""" 
+TEST-UTILS
+
+Tests for the utility functions module
+"""
 import sys
 import unittest
 import pytest
@@ -9,16 +13,16 @@ import pandas as pd
 sys.path.append('../bin')
 sys.path.append('bin/')
 
-import util_functions
+import ms_imputer.util_functions
 
 class UtilsTester(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
 		""" __init__ method for class object """
 		self.mat = np.random.rand(15,10)
-		self.mask = util_functions.get_mask(self.mat, 0.1)
-		self.filled_mask = util_functions.get_mask(self.mat, 1.0)
-		self.empty_mask = util_functions.get_mask(self.mat, 0.0)
+		self.mask = ms_imputer.util_functions.get_mask(self.mat, 0.1)
+		self.filled_mask = ms_imputer.util_functions.get_mask(self.mat, 1.0)
+		self.empty_mask = ms_imputer.util_functions.get_mask(self.mat, 0.0)
 
 		self.empty_mat = np.empty((15,10))
 		self.empty_mat[:] = np.nan
@@ -57,16 +61,16 @@ class UtilsTester(unittest.TestCase):
 		mat0 = np.random.rand(10,5)
 		mat1 = np.random.rand(10,5)
 
-		assert util_functions.mse_func_np(a,b) == 1
-		assert util_functions.mse_func_np(a,a*10) == 2065.5
-		assert util_functions.mse_func_np(a,a) == 0
+		assert ms_imputer.util_functions.mse_func_np(a,b) == 1
+		assert ms_imputer.util_functions.mse_func_np(a,a*10) == 2065.5
+		assert ms_imputer.util_functions.mse_func_np(a,a) == 0
 
-		assert util_functions.mse_func_np(self.mv_mat, mat_shuffled) == 0
+		assert ms_imputer.util_functions.mse_func_np(self.mv_mat, mat_shuffled) == 0
 
-		assert util_functions.mse_func_np(mat0, mat1) != 0
+		assert ms_imputer.util_functions.mse_func_np(mat0, mat1) != 0
 
-		assert util_functions.mse_func_np(self.mat, self.mat) == 0.0
-		assert util_functions.mse_func_np(self.mat, self.empty_mat) == 0
+		assert ms_imputer.util_functions.mse_func_np(self.mat, self.mat) == 0.0
+		assert ms_imputer.util_functions.mse_func_np(self.mat, self.empty_mat) == 0
 		
 		# todo: how to check if the correct warning is thrown?
 
@@ -74,8 +78,8 @@ class UtilsTester(unittest.TestCase):
 	def test_mse_missing(self):
 		""" testing mse_func_np() with some missing values """
 
-		assert util_functions.mse_func_np(self.mat, self.mv_mat) == 0
-		assert util_functions.mse_func_np(self.mat*10, self.mv_mat) != 0
+		assert ms_imputer.util_functions.mse_func_np(self.mat, self.mv_mat) == 0
+		assert ms_imputer.util_functions.mse_func_np(self.mat*10, self.mv_mat) != 0
 
 
 	@pytest.mark.skip(reason='I know this one fails')
@@ -87,23 +91,23 @@ class UtilsTester(unittest.TestCase):
 		tensor2 = tensor0.clone().detach()
 		tensor2[torch.tensor(self.mask)] = np.nan
 
-		assert util_functions.mse_func_torch(tensor0, tensor1) != 0
-		assert util_functions.mse_func_torch(tensor0, tensor0) == 0
-		assert util_functions.mse_func_torch(tensor0, tensor2) == 0
-		assert util_functions.mse_func_torch(tensor2, tensor1) != 0
+		assert ms_imputer.util_functions.mse_func_torch(tensor0, tensor1) != 0
+		assert ms_imputer.util_functions.mse_func_torch(tensor0, tensor0) == 0
+		assert ms_imputer.util_functions.mse_func_torch(tensor0, tensor2) == 0
+		assert ms_imputer.util_functions.mse_func_torch(tensor2, tensor1) != 0
 
 
 	def test_filter_two_mat(self):
 		""" basic tests for train_data_filter() """
 
-		train0, valid0, test0 = util_functions.train_data_filter(
+		train0, valid0, test0 = ms_imputer.util_functions.train_data_filter(
 												self.mat, 
 												self.mv_mat, 
 												self.mv_mat, 
 												min_present=1
 											)
 
-		train1, valid1, test1 = util_functions.train_data_filter(
+		train1, valid1, test1 = ms_imputer.util_functions.train_data_filter(
 												self.mv_mat, 
 												self.mv_mat, 
 												self.mv_mat,
@@ -113,28 +117,28 @@ class UtilsTester(unittest.TestCase):
 		assert train0.shape == valid0.shape == test0.shape
 		assert train1.shape == valid1.shape == test1.shape
 
-		assert util_functions.mse_func_np(train0, valid0) == 0
-		assert util_functions.mse_func_np(train1, valid1) == 0
-		assert util_functions.mse_func_np(valid0, test0) == 0
-		assert util_functions.mse_func_np(valid1, test1) == 0
+		assert ms_imputer.util_functions.mse_func_np(train0, valid0) == 0
+		assert ms_imputer.util_functions.mse_func_np(train1, valid1) == 0
+		assert ms_imputer.util_functions.mse_func_np(valid0, test0) == 0
+		assert ms_imputer.util_functions.mse_func_np(valid1, test1) == 0
 
 
 	def test_filter_three_mat(self):
 		""" test for train_data_filter()...using three matrices this time """
-		train_mask = util_functions.get_mask(self.mat, 0.2)
+		train_mask = ms_imputer.util_functions.get_mask(self.mat, 0.2)
 		train_mat = self.mat.copy()
 		train_mat[train_mask] = np.nan
 
 		valid_mat = self.mat.copy()
 		valid_mat[~train_mask] = np.nan
 
-		valid_mask = util_functions.get_mask(valid_mat, 0.5)
+		valid_mask = ms_imputer.util_functions.get_mask(valid_mat, 0.5)
 		valid_mat[valid_mask] = np.nan
 
 		test_mat = valid_mat.copy()
 		test_mat[valid_mask] = np.nan
 
-		train_f, valid_f, test_f = util_functions.train_data_filter(
+		train_f, valid_f, test_f = ms_imputer.util_functions.train_data_filter(
 													train_mat, 
 													valid_mat, 
 													test_mat, 
@@ -142,6 +146,6 @@ class UtilsTester(unittest.TestCase):
 												)
 
 		assert train_f.shape == valid_f.shape == test_f.shape
-		assert util_functions.mse_func_np(train_f, valid_f) == 0
-		assert util_functions.mse_func_np(valid_f, test_f) == 0
+		assert ms_imputer.util_functions.mse_func_np(train_f, valid_f) == 0
+		assert ms_imputer.util_functions.mse_func_np(valid_f, test_f) == 0
 

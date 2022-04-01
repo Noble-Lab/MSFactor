@@ -31,7 +31,7 @@ PXD = "tester"
 
 # error assessment params -- these seem like reasonable targets
 train_err_tol = 1e-8
-test_err_tol = 1.0
+test_err_tol = 3.0
 
 def simulate_matrix_realistic(matrix_shape):
 	"""
