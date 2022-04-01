@@ -17,9 +17,6 @@ import ms_imputer.utilities
 @click.option("--output_stem", type=str,
 				help="file stem to use for output file",
 				required=True)
-@click.option("--trim_input", type=bool,
-				help="does the maxquant file need to be trimmed?",
-				required=False)
 @click.option("--factors", type=int,
 				help="number of factors to use for reconstruction",
 				required=False)
@@ -32,7 +29,6 @@ import ms_imputer.utilities
 def main(
 		csv_path, 
 		output_stem,
-		trim_input=True, 
 		factors=None, 
 		learning_rate=None, 
 		max_epochs=None
@@ -56,12 +52,12 @@ def main(
 		max_iters = max_epochs
 
 	# trim the input file, if need be
-	if trim_input:
-		ms_imputer.utilities.maxquant_trim(csv_path, output_stem)
+	trim_bool = ms_imputer.utilities.maxquant_trim(csv_path, output_stem)
+	if trim_bool:
 		quants_path = output_stem + "_quants.csv"
 	else:
 		quants_path = csv_path
-	
+
 	# read in quants matrix, replace 0s with nans
 	quants_matrix = pd.read_csv(quants_path)
 	quants_matrix.replace([0, 0.0], np.nan, inplace=True)
@@ -92,9 +88,8 @@ def main(
 					"_reconstructed.csv",
 					index=False
 	)
-
-	if trim_input:
-		os.remove(output_stem + "_quants.csv")
+	#if trim_bool:
+	#	os.remove(output_stem + "_quants.csv")
 
 	print("Done!")
 	print(" ")
