@@ -15,10 +15,9 @@ import torch
 from scipy.stats import ranksums
 
 from ms_imputer.models.linear import GradNMFImputer
-import ms_imputer.util_functions
+import util_functions_test
 
 # simulated matrix configs
-rng = np.random.default_rng(42) # random seed
 matrix_shape = (12,10,3) # (n_rows, n_cols, rank)
 long_matrix_shape = (200,8,2)
 
@@ -28,64 +27,11 @@ tolerance = 0.0001
 batch_size = 100
 max_iters = 400
 learning_rate = 0.05
-min_present = 2 # for partition
-PXD = "tester"                             
+min_present = 2 # for partition                           
 
 # error assessment params
 train_err_tol = 1e-8
 test_err_tol = 1e-1
-
-def simulate_matrix(matrix_shape):
-	""" 
-	Init simulated matrix of known size and rank
-
-	Parameters
-	----------
-	matrix_shape: tuple, (x,y,z) where x=n_rows, y=n_cols
-				  and z=rank
-	Returns
-	-------
-	X: np.ndarray, the simulated matrix
-	"""
-	W = rng.uniform(size=(matrix_shape[0], matrix_shape[2]))
-	H = rng.uniform(size=(matrix_shape[2], matrix_shape[1]))
-	X = W @ H
-
-	assert np.linalg.matrix_rank(X) == matrix_shape[2]
-
-	return X
-
-def train_nmf_model(train_mat, valid_mat, lf):
-	""" 
-	Train a single NMF model, with some given parameters
-	
-	Parameters
-	----------
-	train_mat : np.ndarray, the training matrix
-	valid_mat : np.ndarray, the validation matrix
-	lf : int, number of latent factors to use for reconstruction
-
-	Returns
-	-------
-	model : GradNMFImputer, the fitted GradNMFImputer object
-	recon_mat : np.ndarray, the reconstructed matrix
-	"""
-	model = GradNMFImputer(
-				n_rows=train_mat.shape[0], 
-				n_cols=train_mat.shape[1], 
-				n_factors=lf, 
-				stopping_tol=tolerance, 
-				train_batch_size=batch_size, 
-				eval_batch_size=batch_size,
-				n_epochs=max_iters, 
-				loss_func="MSE",
-				optimizer=torch.optim.Adam,
-				optimizer_kwargs={"lr": learning_rate}
-	)
-
-	recon_mat = model.fit_transform(train_mat, valid_mat)
-
-	return model, recon_mat
 
 class SimulationTester(unittest.TestCase):
 	@classmethod
@@ -93,24 +39,27 @@ class SimulationTester(unittest.TestCase):
 		""" __init__ method for class object """
 
 		# init the first (basic) simulated matrix
-		self.matrix = simulate_matrix(matrix_shape)
+		self.matrix = util_functions_test.simulate_matrix(
+												matrix_shape
+		)
 
-		self.train, self.val, self.test = \
-						ms_imputer.util_functions.split(
-							self.matrix,
-							val_frac=0.1, 
-							test_frac=0.1, 
-							min_present=min_present
+		self.train, self.val, self.test = util_functions_test.split(
+										self.matrix,
+										val_frac=0.1, 
+										test_frac=0.1, 
+										min_present=min_present
 		)
 		# init the second (long) simulated matrix
-		self.long_matrix = simulate_matrix(long_matrix_shape)
+		self.long_matrix = util_functions_test.simulate_matrix(
+												long_matrix_shape
+		)
 
 		self.train_long, self.val_long, self.test_long = \
-						ms_imputer.util_functions.split(
-							self.long_matrix,
-							val_frac=0.1, 
-							test_frac=0.1, 
-							min_present=min_present
+						util_functions_test.split(
+									self.long_matrix,
+									val_frac=0.1, 
+									test_frac=0.1, 
+									min_present=min_present
 		)
 
 	def test_split(self):
@@ -149,11 +98,25 @@ class SimulationTester(unittest.TestCase):
 		NMF model, and reconstruct a small simulated matrix 
 		within a reasonable error tolerance. 
 		"""
-		nmf_model, recon = train_nmf_model(self.train, self.val, lf=1)
+		# init model
+		nmf_model = GradNMFImputer(
+						n_rows=self.train.shape[0], 
+						n_cols=self.train.shape[1], 
+						n_factors=n_factors, 
+						stopping_tol=tolerance, 
+						train_batch_size=batch_size, 
+						eval_batch_size=batch_size,
+						n_epochs=max_iters, 
+						loss_func="MSE",
+						optimizer=torch.optim.Adam,
+						optimizer_kwargs={"lr": learning_rate}
+		)
+		# fit model
+		recon = nmf_model.fit_transform(self.train, self.val)
 
-		train_err = ms_imputer.util_functions.mse_func_np(self.train, recon)
-		val_err = ms_imputer.util_functions.mse_func_np(self.val, recon)
-		test_err = ms_imputer.util_functions.mse_func_np(self.test, recon)
+		train_err = util_functions_test.mse_func_np(self.train, recon)
+		val_err = util_functions_test.mse_func_np(self.val, recon)
+		test_err = util_functions_test.mse_func_np(self.test, recon)
 
 		# make sure error tolerances of predictions for all 
 		#    three sets are reasonable
@@ -204,11 +167,25 @@ class SimulationTester(unittest.TestCase):
 		way more latent factors than is optimal. Model should still arrive
 		at a reasonable solution
 		"""
-		nmf_model, recon = train_nmf_model(self.train, self.val, lf=12)
+		# init model
+		nmf_model = GradNMFImputer(
+						n_rows=self.train.shape[0], 
+						n_cols=self.train.shape[1], 
+						n_factors=12, 
+						stopping_tol=tolerance, 
+						train_batch_size=batch_size, 
+						eval_batch_size=batch_size,
+						n_epochs=max_iters, 
+						loss_func="MSE",
+						optimizer=torch.optim.Adam,
+						optimizer_kwargs={"lr": learning_rate}
+		)
+		# fit model
+		recon = nmf_model.fit_transform(self.train, self.val)
 
-		train_err = ms_imputer.util_functions.mse_func_np(self.train, recon)
-		val_err = ms_imputer.util_functions.mse_func_np(self.val, recon)
-		test_err = ms_imputer.util_functions.mse_func_np(self.test, recon)
+		train_err = util_functions_test.mse_func_np(self.train, recon)
+		val_err = util_functions_test.mse_func_np(self.val, recon)
+		test_err = util_functions_test.mse_func_np(self.test, recon)
 
 		# make sure error tolerances of predictions for all 
 		#    three sets are reasonable...multiplying error tols by a constant
@@ -222,11 +199,25 @@ class SimulationTester(unittest.TestCase):
 		fewer latent factors than is optimal. Model should still arrive
 		at a reasonable solution
 		"""
-		nmf_model, recon = train_nmf_model(self.train, self.val, lf=1)
+		# init model
+		nmf_model = GradNMFImputer(
+						n_rows=self.train.shape[0], 
+						n_cols=self.train.shape[1], 
+						n_factors=1, 
+						stopping_tol=tolerance, 
+						train_batch_size=batch_size, 
+						eval_batch_size=batch_size,
+						n_epochs=max_iters, 
+						loss_func="MSE",
+						optimizer=torch.optim.Adam,
+						optimizer_kwargs={"lr": learning_rate}
+		)
+		# fit model
+		recon = nmf_model.fit_transform(self.train, self.val)
 
-		train_err = ms_imputer.util_functions.mse_func_np(self.train, recon)
-		val_err = ms_imputer.util_functions.mse_func_np(self.val, recon)
-		test_err = ms_imputer.util_functions.mse_func_np(self.test, recon)
+		train_err = util_functions_test.mse_func_np(self.train, recon)
+		val_err = util_functions_test.mse_func_np(self.val, recon)
+		test_err = util_functions_test.mse_func_np(self.test, recon)
 
 		# make sure error tolerances of predictions for all 
 		#    three sets are reasonable
@@ -240,11 +231,25 @@ class SimulationTester(unittest.TestCase):
 		This should more closely resemble the peptide quants matrices
 		our model is designed to work with. 
 		"""
-		nmf_model, recon = train_nmf_model(self.train_long, self.val_long, lf=2)
+		# init model
+		nmf_model = GradNMFImputer(
+						n_rows=self.train_long.shape[0], 
+						n_cols=self.train_long.shape[1], 
+						n_factors=2, 
+						stopping_tol=tolerance, 
+						train_batch_size=batch_size, 
+						eval_batch_size=batch_size,
+						n_epochs=max_iters, 
+						loss_func="MSE",
+						optimizer=torch.optim.Adam,
+						optimizer_kwargs={"lr": learning_rate}
+		)
+		# fit model
+		recon = nmf_model.fit_transform(self.train_long, self.val_long)
 
-		train_err = ms_imputer.util_functions.mse_func_np(self.train_long, recon)
-		val_err = ms_imputer.util_functions.mse_func_np(self.val_long, recon)
-		test_err = ms_imputer.util_functions.mse_func_np(self.test_long, recon)
+		train_err = util_functions_test.mse_func_np(self.train_long, recon)
+		val_err = util_functions_test.mse_func_np(self.val_long, recon)
+		test_err = util_functions_test.mse_func_np(self.test_long, recon)
 
 		# make sure error tolerances of predictions for all 
 		#    three sets are reasonable
