@@ -6,3 +6,6 @@ matplotlib
 seaborn
 torch
 click
+pytest
+coverage
+flake8
