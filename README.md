@@ -41,10 +41,19 @@ Options:
   --help                 Show this message and exit.
 ```    
 
+The `factors`, `learning_rate` and `max_epochs` params are not required.
+They correspond to the number of latent factors to use in training the NMF model, the initial learning rate for the Adam optimizer and the maximum number of training iterations for the model, respectively. 
+Unless otherwise specified, these will be set to:    
+
+`factors` : 8    
+`learning_rate` : 0.05     
+`max_epochs` : 3000     
+
 Authors
 -------
 
-This work was produced by [Lincoln Harris](https://github.com/lincoln-harris) and [Bill Noble](https://github.com/wsnoble), of the University of Washington, and [Will Fondrie](https://github.com/wfondrie) of [Talus Bioscience](https://www.talus.bio/). For questions please contact lincolnh@uw.edu. 
+This work was produced by [Lincoln Harris](https://github.com/lincoln-harris) and [Bill Noble](https://github.com/wsnoble), of the University of Washington, and [Will Fondrie](https://github.com/wfondrie) of [Talus Bioscience](https://www.talus.bio/). 
+For questions please contact lincolnh@uw.edu. 
 
 Contributing
 ------------
