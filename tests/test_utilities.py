@@ -1,48 +1,34 @@
 """
 TEST UTILITIES
 
-Testing the functions in the util_functions_test module.
-Not sure if this module is needed, necessarily
+Testing the ms_imputer module utility functions
 """
 import numpy as np
 import pandas as pd
-import torch
 import unittest
+import os
 import pytest
 
-import util_functions_test
+from ms_imputer.utilities import maxquant_trim
 
 class UtilitiesTester(unittest.TestCase):
-	@classmethod
-	def setUpClass(self):
-		""" __init__ method for class object """
+	def test_maxquant_trim(self):
+		"""
+		Test the utilities.maxquant_trim function, with
+		an expected trimmed matrix 
+		"""
+		raw_mq = "maxquant_raw.csv"
+		output_stem = "mq-tester"
+		maxquant_trim(raw_mq, output_stem)
 
-	@pytest.mark.skip(reason="not implemented")
-	def test_mse(self):
-		"""
-		Make sure the mse loss function is working
-		"""
-		assert True == True
+		assert os.path.exists(output_stem + "_quants.csv")
 
-	@pytest.mark.skip(reason="not implemented")
-	def test_rmse(self):
-		"""
-		Make sure the relative mse loss function is working
-		"""
-		assert True == True
+		mq_func_trim = np.array(pd.read_csv(output_stem + "_quants.csv"))
+		truth_trim = np.array(pd.read_csv("maxquant_trimmed.csv"))
 
-	@pytest.mark.skip(reason="not implemented")
-	def test_simulated_mat(self):
-		"""
-		Make sure the simulated matrices look ok
-		"""
-		assert True == True
+		assert np.array_equal(mq_func_trim, truth_trim)
 
-	@pytest.mark.skip(reason="not implemented")
-	def test_simulated_realistic(self):
-		"""
-		Make sure the more realistic simulated 
-		matrices look ok
-		"""
-		assert True == True
+		os.remove(output_stem + "_quants.csv")
+
+
 
