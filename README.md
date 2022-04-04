@@ -13,8 +13,8 @@ Installation
 
 With the python standard library [`venv`](https://docs.python.org/3/library/venv.html) module
 ```
-python3 -m venv cerebra
-source cerebra/bin/activate
+python3 -m venv ms_imputer
+source ms_imputer/bin/activate
 pip3 install -e . 
 ```
 
@@ -27,17 +27,14 @@ pip3 install -e .
 
 Usage
 -----
-`$ ms_imputer --help` should return usage information
-
 ```
 Usage: ms_imputer [OPTIONS]
 
   Fit an NMF model to the input matrix, impute missing values.
 
 Options:
-  --csv_path TEXT        path to the input matrix (.csv)  [required]
-  --output_stem TEXT     file stem to use for output file  [required]
-  --output_path TEXT     path to output file
+  --csv_path TEXT        path to the input matrix (.csv) [required]
+  --output_stem TEXT     file stem to use for output file [required]
   --factors INTEGER      number of factors to use for reconstruction
   --learning_rate FLOAT  the optimizer learning rate
   --max_epochs INTEGER   max number of training epochs
