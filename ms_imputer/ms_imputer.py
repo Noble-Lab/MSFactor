@@ -88,8 +88,11 @@ def main(
 					"_reconstructed.csv",
 					index=False
 	)
-	#if trim_bool:
-	#	os.remove(output_stem + "_quants.csv")
+	
+	try:
+		os.remove(output_stem + "_quants.csv")
+	except FileNotFoundError:
+		pass
 
 	print("Done!")
 	print(" ")
