@@ -52,7 +52,7 @@ Unless otherwise specified, these will be set to:
 Authors
 -------
 
-This work was produced by [Lincoln Harris](https://github.com/lincoln-harris) and [Bill Noble](https://github.com/wsnoble), of the University of Washington, and [Will Fondrie](https://github.com/wfondrie) of [Talus Bioscience](https://www.talus.bio/). 
+This work was produced by [Lincoln Harris](https://github.com/lincoln-harris), [Bill Noble](https://github.com/wsnoble) and [Seewong Oh](https://homes.cs.washington.edu/~sewoong/), of the University of Washington, and [Will Fondrie](https://github.com/wfondrie) of [Talus Bioscience](https://www.talus.bio/). 
 For questions please contact lincolnh@uw.edu. 
 
 Contributing
