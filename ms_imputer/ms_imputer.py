@@ -12,6 +12,79 @@ import os
 from ms_imputer.models.linear import GradNMFImputer
 import ms_imputer.utilities
 
+def estimate_confidence(
+					matrix, 
+					folds, 
+					n_factors, 
+					tol, 
+					b_size, 
+					n_epochs, 
+					lr,
+):
+	""" 
+	Cross validation-based confidence estimation. For each of
+	k-folds, reconstruct the matrix. Then, collect standard 
+	deviation for every element in the matrix, across all of
+	k reconstructions. 
+	
+	Parameters
+	----------
+	matrix : array-like, 2D, the input matrix 
+	folds : int, the number of folds
+	n_factors : int, the number of factors to use training NMF model
+	tol : float, the early-stopping tolerance for the NMF model
+	b_size : int, the model batch size
+	n_epochs : int, the maximum number of model training epochs
+	lr : float, the model's Adam optimizer initial learning rate
+
+	Returns
+	--------
+	stds_mat : np.array, standard deviations calculated across each fold, 
+				for each matrix element that was originally missing
+	"""
+	# get indices, for k-folds cross validation
+	k_fold_indices = ms_imputer.utilities.shuffle_and_split(matrix, folds)
+	
+	results = []
+
+	# k-folds cross validation loop. Implements hyperparameter search
+	for k in range(0, folds):
+		print("working on fold: ", k)
+		train, val = ms_imputer.utilities.get_kfold_sets(
+													matrix, 
+													k_fold_indices, 
+													k,
+		)
+		# init model
+		nmf_model = GradNMFImputer(
+						n_rows=train.shape[0], 
+						n_cols=train.shape[1], 
+						n_factors=n_factors, 
+						stopping_tol=tol, 
+						train_batch_size=b_size, 
+						eval_batch_size=b_size,
+						n_epochs=n_epochs, 
+						loss_func="MSE",
+						optimizer=torch.optim.Adam,
+						optimizer_kwargs={"lr": lr},
+		)
+		# fit model, get reconstruction
+		recon = nmf_model.fit_transform(train, val)
+		results.append(recon.flatten())
+
+	# get standard deviations across each matrix element
+	results = np.array(results)
+	stds = np.std(results, axis=0)
+	
+	# reshape, into original matrix shape
+	stds_mat = stds.reshape(matrix.shape)
+
+	# want to return stds for only the original nans
+	orig_nans = np.isnan(matrix)
+	stds_mat[~orig_nans] = np.nan
+
+	return stds_mat
+
 def cross_validate(matrix, folds, grid, tol, b_size, n_epochs, lr):
 	""" 
 	Run cross validation, by training an NMF model for a given matrix
@@ -202,6 +275,20 @@ def main(
 		os.remove(output_stem + "_quants.csv")
 	except FileNotFoundError:
 		pass
+
+	if report_confidence:
+		print("running cross validation-based confidence estimation")
+		matrix_stds = estimate_confidence(
+							quants_matrix, 
+							k_folds, 
+							optimal_factors,
+							tolerance,
+							batch_size,
+							max_epochs,
+							learning_rate,
+		)
+		matrix_stds = pd.DataFrame(matrix_stds)
+		matrix_stds.to_csv("imputed_matrix_stds.csv", index=None)
 
 	print("Done!")
 	print(" ")
