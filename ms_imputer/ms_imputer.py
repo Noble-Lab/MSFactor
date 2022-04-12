@@ -8,9 +8,17 @@ import numpy as np
 import click
 import torch
 import os
+from tqdm import tqdm
+import warnings
 
 from ms_imputer.models.linear import GradNMFImputer
 import ms_imputer.utilities
+
+# not a good long term solution
+warnings.filterwarnings(
+	action="ignore",
+	category=UserWarning,
+	module="torch")
 
 def cross_validate(matrix, folds, grid, tol, b_size, n_epochs, lr):
 	""" 
@@ -40,8 +48,8 @@ def cross_validate(matrix, folds, grid, tol, b_size, n_epochs, lr):
 	results = []
 
 	# k-folds cross validation loop
-	for k in range(0, folds):
-		print("working on fold: ", k)
+	#for k in range(0, folds):
+	for k in tqdm(range(0, folds), unit="fold"):
 		# partition
 		train, val = ms_imputer.utilities.get_kfold_sets(
 											matrix, 
@@ -162,6 +170,7 @@ def main(
 	quants_matrix.replace([0, 0.0], np.nan, inplace=True)
 	quants_matrix = np.array(quants_matrix)
 
+	print("running cross validation")
 	# run cross validation hyperparameter search
 	cross_valid_res = cross_validate(
 								quants_matrix, 

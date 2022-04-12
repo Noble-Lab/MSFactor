@@ -182,7 +182,8 @@ class BaseImputer(torch.nn.Module):
             )
 
         # The main training loop:
-        for epoch in tqdm(range(1, self.n_epochs + 1), unit="epoch"):
+        #for epoch in tqdm(range(1, self.n_epochs + 1), unit="epoch"):
+        for epoch in range(1, self.n_epochs + 1):
             # Train an epoch:
             for locs, target in train_loader:
                 target = target.type_as(self.row_factors.weight)
