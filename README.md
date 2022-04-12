@@ -33,19 +33,19 @@ Usage: ms_imputer [OPTIONS]
   Fit an NMF model to the input matrix, impute missing values.
 
 Options:
-  --csv_path TEXT        path to the input matrix (.csv) [required]
-  --output_stem TEXT     file stem to use for output file [required]
-  --factors INTEGER      number of factors to use for reconstruction
-  --learning_rate FLOAT  the optimizer learning rate
-  --max_epochs INTEGER   max number of training epochs
+  --csv_path TEXT             path to the input matrix (.csv) [required]
+  --output_stem TEXT          file stem to use for output file [required]
+  --learning_rate FLOAT       the optimizer learning rate
+  --max_epochs INTEGER        max number of training epochs
+  --report_confidence BOOL    report confidence interval associated with 
+                                each prediction?
   --help                 Show this message and exit.
 ```    
 
-The `factors`, `learning_rate` and `max_epochs` params are not required.
+The `learning_rate` and `max_epochs` & `report_confidence` params are not required.
 They correspond to the number of latent factors to use in training the NMF model, the initial learning rate for the Adam optimizer and the maximum number of training iterations for the model, respectively. 
 Unless otherwise specified, these will be set to:    
 
-`factors` : 8    
 `learning_rate` : 0.05     
 `max_epochs` : 3000     
 
