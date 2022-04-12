@@ -53,59 +53,6 @@ def maxquant_trim(maxquant_path, out_stem):
 	# trimmed
 	return 1
 
-
-def get_kfold_sets(matrix, split_indices, k, k_remaining):
-	""" 
-	Given a list of indices and a matrix, generates train, 
-	validation and test sets. 
-
-	Parameters
-	----------
-	matrix : np.ndarray, the input matrix
-	split_indices : np.ndarray, a list of lists, outputted from 
-	                shuffle_and_split()
-	k : int, the fold
-	k_remaining : array of ints, the remaining indices that have not
-			yet been selected for cross validation
-
-	Returns
-	-------
-	train_set, valid_set, test_set: np.ndarray, the training, 
-	                                validation and test sets
-	k_remaining : array of ints, with the selected k removed
-	"""
-	# init test and validation sets
-	test_set = np.full(matrix.shape, np.nan)
-	valid_set = np.full(matrix.shape, np.nan)
-
-	# get index for validation set such that j != k
-	j = random.choice([elm for elm in k_remaining if elm != k])
-	# so that we never repeat j
-	k_remaining.remove(j)
-
-	test_indices = split_indices[k]
-	valid_indices = split_indices[j]
-
-	# unpackage zipped array, get tuples
-	test_rows, test_cols = zip(*test_indices)
-	valid_rows, valid_cols = zip(*valid_indices)
-    
-	# add values to validation and test sets
-	test_set[test_rows, test_cols] = matrix[test_rows, test_cols]
-	valid_set[valid_rows, valid_cols] = matrix[valid_rows, valid_cols]
-
-	# get validation and test masks
-	valid_mask = np.isnan(valid_set)
-	test_mask = np.isnan(test_set)
-
-	# init train set, set validation and test masks to nan
-	train_set = matrix.copy()
-	train_set[~valid_mask] = np.nan
-	train_set[~test_mask] = np.nan
-
-	return train_set, valid_set, test_set, k_remaining
-
-
 def mse_func_np(x_mat, y_mat):
 	"""
 	Calculate the MSE for two matricies with missing values. Each
@@ -131,11 +78,48 @@ def mse_func_np(x_mat, y_mat):
 		return 0
 	return mse / np.sum(~missing)
 
+def get_kfold_sets(matrix, split_indices, k):
+	""" 
+	Given a list of present value indices and a matrix, 
+	generates train, validation and test sets. 
+	
+	Parameters
+	----------
+	matrix : np.ndarray, the input matrix
+	split_indices : np.ndarray, a nested list, outputted from 
+	                shuffle_and_split(), of the indices of present
+	                values
+	k : int, the current fold. This will become the index of the
+					validation set
+	Returns
+	-------
+	train_set, valid_set: np.ndarray, the training and 
+					validation sets
+	"""
+	# init validation set
+	valid_set = np.full(matrix.shape, np.nan)
+
+	valid_indices = split_indices[k]
+
+	# unpackage zipped array, get tuples
+	valid_rows, valid_cols = zip(*valid_indices)
+    
+	# add values to validation set
+	valid_set[valid_rows, valid_cols] = matrix[valid_rows, valid_cols]
+
+	# get validation and test masks
+	valid_mask = np.isnan(valid_set)
+
+	# init train set, set validation and test masks to nan
+	train_set = matrix.copy()
+	train_set[~valid_mask] = np.nan
+
+	return train_set, valid_set
 
 def shuffle_and_split(matrix, k_folds):
 	""" 
-	Shuffle the indices from an input matrix, and then split 
-	into k_folds equal pieces. 
+	Shuffle the indices of present values from an input 
+	matrix, and then split into k_folds equal pieces. 
 
 	Parameters
 	----------
@@ -144,8 +128,9 @@ def shuffle_and_split(matrix, k_folds):
 
 	Returns
 	-------
-	split_indices: np.ndarray, a list of list containing 
-	        randomly selected indices for each of k splits
+	split_indices: np.ndarray, a nested list containing the
+				randomly selected indicies of present values
+				only, for each of k splits
 	"""
 	# get indices from matrix, shuffle
 	indices = np.vstack(np.nonzero(~np.isnan(matrix)))
@@ -158,8 +143,7 @@ def shuffle_and_split(matrix, k_folds):
 	split_indices = np.array_split(indices_shuffled_zip, k_folds)
 
 	return split_indices
-
-
+ 
 def split(matrix, val_frac=0.1, test_frac=0.1, min_present=5, 
             random_state=42):
     """
