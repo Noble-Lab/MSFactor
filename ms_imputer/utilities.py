@@ -78,7 +78,7 @@ def mse_func_np(x_mat, y_mat):
 		return 0
 	return mse / np.sum(~missing)
 
-def get_kfold_sets(matrix, split_indices, k):
+def kfolds_partition(matrix, split_indices, k, min_present=4):
 	""" 
 	Given a list of present value indices and a matrix, 
 	generates train, validation and test sets. 
@@ -91,6 +91,8 @@ def get_kfold_sets(matrix, split_indices, k):
 	                values
 	k : int, the current fold. This will become the index of the
 					validation set
+	min_present : int, the minumum number of present values per 
+					row in original matrix
 	Returns
 	-------
 	train_set, valid_set: np.ndarray, the training and 
@@ -114,21 +116,58 @@ def get_kfold_sets(matrix, split_indices, k):
 	train_set = matrix.copy()
 	train_set[~valid_mask] = np.nan
 
+	# remove peptides/proteins with too many missing values:
+	num_present = np.sum(~np.isnan(train_set), axis=1)
+	discard = num_present < min_present
+	num_discard = discard.sum()
+
+	train_set = np.delete(train_set, discard, axis=0)
+	valid_set = np.delete(valid_set, discard, axis=0)
+
 	return train_set, valid_set
 
-def shuffle_and_split(matrix, k_folds):
-	""" 
-	Shuffle the indices of present values from an input 
-	matrix, and then split into k_folds equal pieces. 
+def discard_empty_rows(matrix, min_present=4):
+	"""
+	Trim the input matrix such that rows with < min_present
+	present values are discarded. 
 
 	Parameters
 	----------
-	matrix: np.ndarray, the input matrix
-	k_folds: int, the number of folds to split into
+	matrix : np.ndarray, the input matrix
+	min_present : int, if a row has fewer present values than
+					this, discard it
+	Returns
+	-------
+	matrix : np.ndarray, the trimmed matrix
+	discard : array-like, the indices of the discarded rows
+	"""
+	matrix = np.array(matrix).astype(float)
+	matrix[matrix == 0] = np.nan
+	num_present = np.sum(~np.isnan(matrix), axis=1)
+	discard = num_present < min_present
+	num_discard = discard.sum()
+
+	#matrix = np.delete(matrix, discard, axis=0)
+
+	matrix_pd = pd.DataFrame(matrix)
+	matrix_pd = matrix_pd[~discard]
+
+	return matrix_pd, discard
+
+def k_folds_split(matrix, k_folds):
+	""" 
+	Shuffle the indices of present values from an input 
+	matrix, and then split into k_folds equal pieces. Return
+	indices of these pieces/
+
+	Parameters
+	----------
+	matrix : np.ndarray, the input matrix
+	k_folds : int, the number of folds to split into
 
 	Returns
 	-------
-	split_indices: np.ndarray, a nested list containing the
+	split_indices : np.ndarray, a nested list containing the
 				randomly selected indicies of present values
 				only, for each of k splits
 	"""
@@ -144,81 +183,58 @@ def shuffle_and_split(matrix, k_folds):
 
 	return split_indices
  
-def split(matrix, val_frac=0.1, test_frac=0.1, min_present=5, 
-            random_state=42):
-    """
-    Split a data matrix into training, validation, test sets.
+def partition(matrix, val_frac=0.1, min_present=4, random_state=42):
+	"""
+	Split a data matrix into training, validation, test sets.
 
-    Note that the fractions of data in the validation and tests 
-    sets is only approximate due to the need to drop rows with 
-    too much missing data.
+	Note that the fractions of data in the validation and tests 
+	sets is only approximate due to the need to drop rows with 
+	too much missing data.
 
-    Parameters
-    ----------
-    matrix : array-like
-        The data matrix to split.
-    val_frac : float, optional
-        The fraction of data to assign to the validation set.
-    test_frac : float, optional
-        The fraction of data to assign to the test set.
-    min_present : int, optional
-        The minimum number of non-missing values required in each 
-        row of the training set.
-    random_state : int or numpy.random.Generator
-        The random state for reproducibility.
+	Parameters
+	----------
+	matrix : array-like
+		The data matrix to split.
+	val_frac : float, optional
+		The fraction of data to assign to the validation set.
+	min_present : int, optional
+		The minimum number of non-missing values required in each 
+		row of the training set.
+	random_state : int or numpy.random.Generator
+		The random state for reproducibility.
 
-    Returns
-    -------
-    train_set : numpy.ndarray
-        The training set.
-    val_set : numpy.ndarray
-        The validation set, where other values are NaNs.
-    test_set : numpy.ndarray
-        The test set, where other values are NaNs.
-    """
-    rng = np.random.default_rng(random_state)
-    if val_frac + test_frac > 1:
-        raise ValueError("'val_frac' and 'test_frac' cannot sum to more than 1.")
+	Returns
+	-------
+	train_set : numpy.ndarray
+		The training set.
+	val_set : numpy.ndarray
+		The validation set, where other values are NaNs.
+	"""
+	rng = np.random.default_rng(random_state)
 
-    # Prepare the matrix:
-    matrix = np.array(matrix).astype(float)
-    matrix[matrix == 0] = np.nan
-    num_present = np.sum(~np.isnan(matrix), axis=1)
-    discard = num_present < min_present
-    num_discard = discard.sum()
+	# assign splits:
+	indices = np.vstack(np.nonzero(~np.isnan(matrix)))
+	rng.shuffle(indices, axis=1)
 
-    matrix = np.delete(matrix, discard, axis=0)
+	n_val = int(indices.shape[1] * val_frac)
+	n_train = indices.shape[1] - n_val
 
-    # Assign splits:
-    indices = np.vstack(np.nonzero(~np.isnan(matrix)))
-    rng.shuffle(indices, axis=1)
+	train_idx = tuple(indices[:, :n_train])
+	val_idx = tuple(indices[:,-n_val:])
 
-    n_val = int(indices.shape[1] * val_frac)
-    n_test = int(indices.shape[1] * test_frac)
-    n_train = indices.shape[1] - n_val - n_test
+	train_set = np.full(matrix.shape, np.nan)
+	val_set = np.full(matrix.shape, np.nan)
 
-    train_idx = tuple(indices[:, :n_train])
-    val_idx = tuple(indices[:, n_train:(n_train + n_val)])
-    test_idx = tuple(indices[:, -n_test:])
+	train_set[train_idx] = matrix[train_idx]
+	val_set[val_idx] = matrix[val_idx]
 
-    train_set = np.full(matrix.shape, np.nan)
-    val_set = np.full(matrix.shape, np.nan)
-    test_set = np.full(matrix.shape, np.nan)
+	# remove peptides/proteins with too many missing values:
+	num_present = np.sum(~np.isnan(train_set), axis=1)
+	discard = num_present < min_present
+	num_discard = discard.sum()
 
-    train_set[train_idx] = matrix[train_idx]
-    val_set[val_idx] = matrix[val_idx]
-    test_set[test_idx] = matrix[test_idx]
+	train_set = np.delete(train_set, discard, axis=0)
+	val_set = np.delete(val_set, discard, axis=0)
 
-    # Remove Proteins with too many missing values:
-    num_present = np.sum(~np.isnan(train_set), axis=1)
-    discard = num_present < min_present
-    num_discard = discard.sum()
-
-    train_set = np.delete(train_set, discard, axis=0)
-    val_set = np.delete(val_set, discard, axis=0)
-    test_set = np.delete(test_set, discard, axis=0)
-
-    return train_set, val_set, test_set
-
-
+	return train_set, val_set
 

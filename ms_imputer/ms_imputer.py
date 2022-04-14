@@ -20,7 +20,16 @@ warnings.filterwarnings(
 	category=UserWarning,
 	module="torch")
 
-def cross_validate(matrix, folds, grid, tol, b_size, n_epochs, lr):
+def cross_validate(
+	matrix, 
+	folds, 
+	grid, 
+	tol, 
+	b_size, 
+	n_epochs, 
+	lr, 
+	min_present
+):
 	""" 
 	Run nested cross validation for an input matrix, a given
 	hyperparameter grid and a given value of k. For each of k folds, 
@@ -37,7 +46,8 @@ def cross_validate(matrix, folds, grid, tol, b_size, n_epochs, lr):
 	b_size : int, the model batch size
 	n_epochs : int, the maximum number of model training epochs
 	lr : float, the model's Adam optimizer initial learning rate
-
+	min_present : int, the minimum number of present values in a row
+				of the training set in order for our model to impute it
 	Returns
 	--------
 	averages_df : pd.DataFrame, tabular output of cross validation
@@ -50,18 +60,16 @@ def cross_validate(matrix, folds, grid, tol, b_size, n_epochs, lr):
 	results = []
 
 	# k-folds cross validation loop
-	#for k in range(0, folds):
 	for k in tqdm(range(0, folds), unit="fold"):
 		# partition
 		train, val = ms_imputer.utilities.kfolds_partition(
 											matrix, 
 											k_fold_indices, 
 											k,
+											min_present,
 		)
-
 		# hyperparameter search
 		for n_factors in grid:
-			# init model
 			nmf_model = GradNMFImputer(
 							n_rows=train.shape[0], 
 							n_cols=train.shape[1], 
@@ -179,15 +187,18 @@ def main(
 
 	# read in quants matrix, replace 0s with nans
 	quants_matrix = pd.read_csv(quants_path)
+	quants_headers = quants_matrix.columns
 	quants_matrix.replace([0, 0.0], np.nan, inplace=True)
 	quants_matrix = np.array(quants_matrix)
 
 	# discard (mostly) empty rows
-	quants_matrix_trim, discard_idx = ms_imputer.utilities.\
+	quants_matrix_trim_pd, discard_idx = ms_imputer.utilities.\
 												discard_empty_rows(
 													quants_matrix, 
 													min_present
 	)
+	quants_matrix_trim = np.array(quants_matrix_trim_pd)
+
 	print("running cross validation")
 	# run cross validation hyperparameter search
 	cross_valid_res = cross_validate(
@@ -198,6 +209,7 @@ def main(
 								batch_size, 
 								max_epochs, 
 								learning_rate,
+								min_present,
 	)
 
 	# select the optimal choice in latent factors
@@ -227,11 +239,24 @@ def main(
 						optimizer=torch.optim.Adam,
 						optimizer_kwargs={"lr": learning_rate},
 	)
+
 	# fit model, get reconstruction
 	optimal_recon = nmf_model_opt.fit_transform(quants_matrix_trim)
+	optimal_recon = pd.DataFrame(optimal_recon, columns=quants_headers)
+	optimal_recon.replace([0, 0.0], np.nan, inplace=True)
+
+	# the final reconstructed matrix -- reindex with the indices from
+		# the initial matrix
+	# recon_reshape = quants_matrix_trim_pd.reindex(range(quants_matrix.shape[0]),
+	# 										fill_value=np.nan)
+	# recon_reshape.columns = quants_headers
+	# recon_reshape[discard_idx] = quants_matrix[discard_idx]
+
+	# # how to get the non-discard indices? from the recon matrix? 
+	# recon_reshape[~discard_idx] = optimal_recon[~discard_idx]
 
 	# write optimally reconstructed matrix to csv
-	pd.DataFrame(optimal_recon).to_csv(
+	optimal_recon.to_csv(
 					output_stem + 
 					"_reconstructed.csv",
 					index=False
