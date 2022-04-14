@@ -43,19 +43,22 @@ def cross_validate(matrix, folds, grid, tol, b_size, n_epochs, lr):
 	averages_df : pd.DataFrame, tabular output of cross validation
 	"""
 	# get indices, for k-folds cross validation
-	k_fold_indices = ms_imputer.utilities.shuffle_and_split(matrix, folds)
-	
+	k_fold_indices = ms_imputer.utilities.k_folds_split(
+													matrix, 
+													folds
+	)
 	results = []
 
 	# k-folds cross validation loop
 	#for k in range(0, folds):
 	for k in tqdm(range(0, folds), unit="fold"):
 		# partition
-		train, val = ms_imputer.utilities.get_kfold_sets(
+		train, val = ms_imputer.utilities.kfolds_partition(
 											matrix, 
 											k_fold_indices, 
 											k,
 		)
+
 		# hyperparameter search
 		for n_factors in grid:
 			# init model
@@ -123,7 +126,10 @@ def cross_validate(matrix, folds, grid, tol, b_size, n_epochs, lr):
 				required=False, default=3000)	
 @click.option("--k_folds", type=int,
 				help="number of cross validation folds", 
-				required=False, default=10)		
+				required=False, default=3)		
+@click.option("--min_present", type=int,
+				help="minimum number of present values for a peptide or protein", 
+				required=False, default=4)	
 
 def main(
 		csv_path, 
@@ -131,6 +137,7 @@ def main(
 		learning_rate, 
 		max_epochs,
 		k_folds,
+		min_present,
 ):
 	"""  
 	Search across a 1D grid of hyperparameters to select the optimal
@@ -151,7 +158,12 @@ def main(
 				Optional. Default=0.05.
 	max_epochs : int, the maximum number of training epochs for the model.
 				Optional. Default=3000.
-	k_folds : int, k, for k-folds cross validation
+	k_folds : int, k, for k-folds cross validation. 
+				Optional. Default=10.
+	min_present : int, the minimum number of present values for a peptide
+				or protein required for the model to impute that peptide
+				or protein. 
+				Optional. Default=5.
 	"""
 	# Default model configs. Not overwritable
 	tolerance = 0.0001
@@ -170,10 +182,16 @@ def main(
 	quants_matrix.replace([0, 0.0], np.nan, inplace=True)
 	quants_matrix = np.array(quants_matrix)
 
+	# discard (mostly) empty rows
+	quants_matrix_trim, discard_idx = ms_imputer.utilities.\
+												discard_empty_rows(
+													quants_matrix, 
+													min_present
+	)
 	print("running cross validation")
 	# run cross validation hyperparameter search
 	cross_valid_res = cross_validate(
-								quants_matrix, 
+								quants_matrix_trim, 
 								k_folds, 
 								factors_grid,
 								tolerance, 
@@ -187,18 +205,19 @@ def main(
 	min_fold_df = cross_valid_res[cross_valid_res["valid_error"] == val_err_min]
 	optimal_factors = list(min_fold_df["n_factors"])[0]
 
-	# partition -- don't withhold any rows
-	train, val, test = ms_imputer.utilities.split(
-										quants_matrix, 
-										val_frac=0.1, 
-										test_frac=0.01, 
-										min_present=0,
-	)
 	print("training model with optimal choice in latent factors")
+
+	# partition -- warning: this will exclude additional rows
+	# train, val = ms_imputer.utilities.partition(
+	# 									quants_matrix_trim, 
+	# 									val_frac=0.1, 
+	# 									min_present=min_present,
+	# )
+
 	# init optimal model
 	nmf_model_opt = GradNMFImputer(
-						n_rows=train.shape[0], 
-						n_cols=train.shape[1], 
+						n_rows=quants_matrix_trim.shape[0], 
+						n_cols=quants_matrix_trim.shape[1], 
 						n_factors=int(optimal_factors), 
 						stopping_tol=tolerance, 
 						train_batch_size=batch_size, 
@@ -209,8 +228,7 @@ def main(
 						optimizer_kwargs={"lr": learning_rate},
 	)
 	# fit model, get reconstruction
-	optimal_recon = nmf_model_opt.fit(train, val)
-	optimal_recon = nmf_model_opt.transform(quants_matrix)
+	optimal_recon = nmf_model_opt.fit_transform(quants_matrix_trim)
 
 	# write optimally reconstructed matrix to csv
 	pd.DataFrame(optimal_recon).to_csv(
@@ -225,7 +243,6 @@ def main(
 		pass
 
 	print("Done!")
-	print(" ")
 
 if __name__ == "__main__":
     main()
